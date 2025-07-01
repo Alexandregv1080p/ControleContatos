@@ -1,6 +1,7 @@
 ﻿using ControleContatos.Models;
 using ControleContatos.Repository;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ControleContatos.Controllers
 {
@@ -33,20 +34,64 @@ namespace ControleContatos.Controllers
         }
         public IActionResult Apagar(int id) 
         {
-            _contatoRepository.Apagar(id);
-            return RedirectToAction("Index");
+            try
+            {
+                bool apagado = _contatoRepository.Apagar(id);
+                if (apagado)
+                {
+                    TempData["MensagemSucesso"] = "Contato deletado com sucesso";
+                }
+                else
+                {
+                    TempData["MensagemErro"] = "Ops, não conseguimos deletar seu contato, tente novamente!";
+                }
+                return RedirectToAction("Index");
+
+            }
+            catch (System.Exception erro)
+            {
+
+                TempData["MensagemErro"] = $"Ops, não conseguimos deletar seu contato, tente novamente! detalhes do erro:{erro.Message}";
+                return RedirectToAction("Index");
+            }
         }
         [HttpPost]
         public IActionResult Criar(ContatoModel contato)
         {
-            _contatoRepository.Adicionar(contato);
-            return RedirectToAction("Index");
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    _contatoRepository.Adicionar(contato);
+                    TempData["MensagemSucesso"] = "Contato cadastrado com sucesso";
+                    return RedirectToAction("Index");
+                }
+                return View(contato);
+            }
+            catch (System.Exception erro) {
+                TempData["MensagemErro"] = $"Ops, não conseguimos cadastrar seu contato, tente novamente!, detalhe do erro:{erro.Message}";
+                return RedirectToAction("Index");
+            }
         }
         [HttpPost]
         public IActionResult Alterar(ContatoModel contato)
         {
-            _contatoRepository.Atualizar(contato);
-            return RedirectToAction("Index");
+            try
+            {
+                if (ModelState.IsValid)
+                {
+
+                    _contatoRepository.Atualizar(contato);
+                    TempData["MensagemSucesso"] = "Contato alterado com sucesso";
+                    return RedirectToAction("Index");
+                }
+                return View("Editar", contato);
+            }
+            catch (System.Exception erro)
+            {
+                TempData["MensagemErro"] = $"Ops, não conseguimos atualizar seu contato, tente novamente!, detalhe do erro:{erro.Message}";
+                return RedirectToAction("Index");
+            }
         }
 
     }
